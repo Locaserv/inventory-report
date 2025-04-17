@@ -1,11 +1,15 @@
-import pdfplumber
-import pandas as pd
-import os
-import re
-from openpyxl import load_workbook
-from functools import reduce
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
+from openpyxl import load_workbook
+import pandas as pd
+import pdfplumber
+
+from functools import reduce
+import logging
+import re
+import os
+
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
 
 class PDFToExcelConverter:
     def __init__(self, xlsx_folder="/inventory_report"):
@@ -130,20 +134,36 @@ class PDFToExcelConverter:
         filename = f"relatorio_estoque_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         output_path = os.path.join(self._xlsx_path, filename)
 
-        df.to_excel(output_path, index=False, engine="openpyxl")
+        df.to_excel(output_path, index=False, engine="openpyxl", startrow=2)
 
         wb = load_workbook(output_path)
         ws = wb.active
 
+        # Header
+        today = pd.Timestamp.now().strftime("%d/%m/%Y")
+        ws.merge_cells("A1:I1")
+        ws["A1"] = "LOCASERV - LOCAÇÃO E SERVIÇOS LTDA"
+        ws["A1"].font = Font(size=14, bold=True, color="FFFFFF")
+        ws["A1"].fill = PatternFill("solid", fgColor="4F81BD")
+        ws["A1"].alignment = Alignment(horizontal="center")
+
+        # Sub-Header
+        ws.merge_cells("A2:I2")
+        ws["A2"] = f"RELATÓRIO GERAL DE ESTOQUE    DATA: {today}"
+        ws["A2"].font = Font(size=12, italic=True, bold=True, color="FFFFFF")
+        ws["A2"].fill = PatternFill("solid", fgColor="4F81BD")
+        ws["A2"].alignment = Alignment(horizontal="center")
+
+        # Header table
         header_font = Font(bold=True, color="FFFFFF")
         header_fill = PatternFill("solid", fgColor="4F81BD")
 
-        for col_num, cell in enumerate(ws[1], 1):
+        for col_num, cell in enumerate(ws[3], 1):
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center")
 
-        for col_cells in ws.iter_cols(min_row=1, max_row=ws.max_row):
+        for col_cells in ws.iter_cols(min_row=3, max_row=ws.max_row):
             header_value = str(col_cells[0].value) if col_cells[0].value else ""
             max_length = len(header_value)
 
@@ -155,7 +175,7 @@ class PDFToExcelConverter:
                     max_length = max(max_length, len(str(cell.value)))
 
             col_letter = get_column_letter(col_cells[0].column)
-            ws.column_dimensions[col_letter].width = max_length + 2
+            ws.column_dimensions[col_letter].width = max_length + 4
 
         wb.save(output_path)
 
