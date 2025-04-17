@@ -131,7 +131,7 @@ class PDFToExcelConverter:
             return None
 
         os.makedirs(self._xlsx_path, exist_ok=True)
-        filename = f"relatorio_estoque_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        filename = f"relatorio_estoque_{pd.Timestamp.now().strftime('%d%m%Y_%H%M%S')}.xlsx"
         output_path = os.path.join(self._xlsx_path, filename)
 
         df.to_excel(output_path, index=False, engine="openpyxl", startrow=2)
@@ -179,7 +179,6 @@ class PDFToExcelConverter:
 
         wb.save(output_path)
 
-        print(f"✅ Relatório gerado e estilizado com sucesso: {output_path}")
         return output_path
     
     def generate_report(self):
@@ -187,13 +186,15 @@ class PDFToExcelConverter:
         return self.save_report_to_excel(df)
 
 
+# How to use the class
+# from pdf_to_excel import PDFToExcelConverter
 
-converter = PDFToExcelConverter(xlsx_folder="./relatorios")
-converter.add_pdf_path("./entrada/PETROLINA.pdf")
-converter.add_pdf_path("./entrada/GARANHUNS.pdf")
-converter.add_pdf_path("./entrada/CRUZ_DE_SALINAS.pdf")
-converter.add_pdf_path("./entrada/IPOJUCA.pdf")
-converter.add_pdf_path("./entrada/RAJADA.pdf")
+# converter = PDFToExcelConverter(xlsx_folder="./relatorios")
+# converter.add_pdf_path("./entrada/PETROLINA.pdf")
+# converter.add_pdf_path("./entrada/GARANHUNS.pdf")
+# converter.add_pdf_path("./entrada/CRUZ_DE_SALINAS.pdf")
+# converter.add_pdf_path("./entrada/IPOJUCA.pdf")
+# converter.add_pdf_path("./entrada/RAJADA.pdf")
 
-converter.set_xlsx_path("relatorios")
-converter.generate_report()
+# converter.set_xlsx_path("relatorios")
+# converter.generate_report()
