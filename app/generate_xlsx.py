@@ -19,12 +19,22 @@ class PDFToExcelConverter:
     def add_pdf_path(self, path):
         self._pdf_paths.append(path)
     
+    def extract_local_from_pdf(self, pagina):
+        """
+        Extrai o local diretamente do texto bruto da página.
+        """
+        texto = pagina.extract_text()
+        match = re.search(r"LLooccaall::\s*(\d+\s*-\s*.+)", texto)
+        if match:
+            return match.group(1).strip().split(" ")[-1].upper()
+        return None
 
     def extract_data(self):
         self._data = []  # reset
 
         for pdf in self._pdf_paths:
             with pdfplumber.open(pdf) as pdf_file:
+                local = self.extract_local_from_pdf(pdf_file.pages[0])
                 for page in pdf_file.pages:
                     lines = page.extract_text().split("\n")
                     for line in lines:
@@ -44,7 +54,7 @@ class PDFToExcelConverter:
                                 self._data.append({
                                     "Código": codigo,
                                     "Descrição": descricao,
-                                    "Local": os.path.splitext(os.path.basename(pdf))[0].upper(),
+                                    "Local": local,
                                     "Quantidade": saldo,
                                     "Preço Médio": preco_medio,
                                     "Total": total
