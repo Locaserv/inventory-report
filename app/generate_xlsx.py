@@ -12,13 +12,16 @@ import os
 logging.getLogger("pdfminer").setLevel(logging.ERROR)
 
 class PDFToExcelConverter:
-    def __init__(self, xlsx_folder="/inventory_report"):
+    def __init__(self, xlsx_folder="inventory_report"):
         self._xlsx_path = xlsx_folder
         self._pdf_paths = []
         self._data = []
 
     def set_xlsx_path(self, path):
         self._xlsx_path = path
+    
+    def get_xlsx_path(self):
+        return self._xlsx_path
 
     def add_pdf_path(self, path):
         self._pdf_paths.append(path)
